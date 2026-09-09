@@ -14,44 +14,44 @@ const TRANSLATIONS = {
   'pt-BR': {
     documentTitle: 'Notas Flutuantes',
     metaDescription: 'App de notas flutuantes com quadros, ligações entre notas, busca, zoom e calendário.',
-    addNote: '+ Nova nota',
+    addNote: 'Nova nota',
     addNoteTitle: 'Criar uma nova nota',
-    undo: '↺ Desfazer',
+    undo: 'Desfazer',
     undoTitle: 'Desfazer (Ctrl+Z)',
-    redo: '↻ Refazer',
+    redo: 'Refazer',
     redoTitle: 'Refazer (Ctrl+Shift+Z ou Ctrl+Y)',
-    linkMode: '🔗 Ligar',
+    linkMode: 'Ligar',
     linkModeTitle: 'Ativar modo de ligar notas',
     calendarTitle: 'Mostrar/ocultar calendário',
     boardSelectTitle: 'Trocar de quadro',
-    addBoard: '+ Quadro',
+    addBoard: 'Quadro',
     addBoardTitle: 'Novo quadro',
     renameBoardTitle: 'Renomear quadro',
     searchPlaceholder: 'Buscar nas notas... (Enter navega)',
     zoomOutTitle: 'Diminuir zoom',
     zoomInTitle: 'Aumentar zoom',
     zoomResetTitle: 'Redefinir visualização',
-    saved: '💾 Salvo',
-    saveError: '⚠ Erro ao salvar',
-    settings: '⚙ Configurações',
+    saved: 'Salvo',
+    saveError: 'Erro ao salvar',
+    settings: 'Configurações',
     settingsTitle: 'Configurações',
     close: 'Fechar',
-    backup: '💾 Backup',
-    exportAll: '⬇ Exportar tudo',
+    backup: 'Backup',
+    exportAll: 'Exportar tudo',
     exportAllTitle: 'Baixar backup com todos os quadros em JSON',
-    exportBoard: '⬇ Exportar quadro atual',
+    exportBoard: 'Exportar quadro atual',
     exportBoardTitle: 'Baixar backup apenas do quadro atual em JSON',
-    importBackup: '⬆ Importar backup',
+    importBackup: 'Importar backup',
     importBackupTitle: 'Carregar backup em JSON',
-    appearance: '🎨 Aparência',
-    darkMode: '🌙 Modo escuro',
+    appearance: 'Aparência',
+    darkMode: 'Modo escuro',
     darkModeTitle: 'Alternar modo escuro',
-    language: '🌐 Idioma',
+    language: 'Idioma',
     languageLabel: 'Idioma da interface',
     languageTitle: 'Escolher idioma',
     languagePt: 'Português (Brasil)',
     languageEn: 'English',
-    delete: '🗑 Apagar',
+    delete: 'Apagar',
     clearBoard: 'Limpar notas do quadro atual',
     clearBoardTitle: 'Apagar todas as notas do quadro atual',
     deleteBoard: 'Apagar quadro atual',
@@ -59,13 +59,13 @@ const TRANSLATIONS = {
     previousMonth: 'Mês anterior',
     nextMonth: 'Próximo mês',
     calendarFoot: 'Clique em um dia para inserir na nota ativa',
-    createLink: '🔗 Criar link',
+    createLink: 'Criar link',
     linkPlaceholder: 'Cole uma URL ou caminho local...',
     insertLink: 'Inserir link',
     cancel: 'Cancelar',
     file: 'Arquivo',
     fileLower: 'arquivo',
-    closeEsc: '✕ Fechar',
+    closeEsc: 'Fechar',
     closeEscTitle: 'Fechar (Esc)',
     defaultBoard: ({ n }) => `Quadro ${n}`,
     boardFallback: 'Quadro',
@@ -75,16 +75,16 @@ const TRANSLATIONS = {
     confirmDeleteBoard: ({ name }) => `Apagar o quadro "${name}" e todas as suas notas?`,
     previewUnavailable: 'Pré-visualização não disponível.',
     previewUnavailableType: 'Pré-visualização não disponível para este tipo de arquivo.',
-    saveChanges: '💾 Salvar alterações na nota',
+    saveChanges: 'Salvar alterações na nota',
     discard: 'Descartar',
     editHint: 'Edite o texto acima e salve para atualizar a nota',
-    savedShort: '✅ Salvo!',
+    savedShort: 'Salvo!',
     downloadFile: 'Baixar arquivo',
     siteCannotEmbed: 'Este site não permite ser exibido aqui.',
-    openNewTab: 'Abrir em nova aba ↗',
-    imageTooLarge: ({ name }) => `📎 ${name} (imagem grande demais pra importar)`,
-    textFileTooLarge: ({ name }) => `📎 ${name} (arquivo grande demais pra importar o conteúdo)`,
-    pdfTooLarge: ({ name }) => `📄 ${name} (PDF grande demais pra importar)`,
+    openNewTab: 'Abrir em nova aba',
+    imageTooLarge: ({ name }) => `${name} (imagem grande demais pra importar)`,
+    textFileTooLarge: ({ name }) => `${name} (arquivo grande demais pra importar o conteúdo)`,
+    pdfTooLarge: ({ name }) => `${name} (PDF grande demais pra importar)`,
     dragExplorerToOpen: 'Arraste do Explorer para abrir',
     folder: 'Pasta',
     stats: ({ notes, links }) => `${notes} nota${notes === 1 ? '' : 's'} · ${links} ligaç${links === 1 ? 'ão' : 'ões'}`,
@@ -94,7 +94,7 @@ const TRANSLATIONS = {
     noteColor: 'Cor da nota',
     insertDate: 'Inserir data',
     makeLink: 'Transformar texto selecionado em link',
-    linkButton: '🔗 Link',
+    linkButton: 'Link',
     openLink: 'Abrir link (Shift+clique abre no navegador)',
     deleteNote: 'Apagar',
     notePlaceholder: 'Escreva algo...',
@@ -103,8 +103,8 @@ const TRANSLATIONS = {
     colorNumber: ({ n }) => `Cor ${n}`,
     colors: ['Amarelo', 'Laranja', 'Vermelho', 'Rosa claro', 'Rosa escuro', 'Roxo', 'Azul', 'Ciano', 'Verde claro', 'Verde escuro', 'Marrom', 'Cinza'],
     confirmClearBoard: 'Apagar todas as notas deste quadro?',
-    importAllConfirm: ({ boards, notes }) => `Importar ${boards} quadro(s) com ${notes} nota(s) no total.\n\n⚠️ Isso vai substituir TODOS os seus quadros atuais. Continuar?`,
-    importSuccess: ({ boards }) => `✅ ${boards} quadro(s) importado(s) com sucesso!`,
+    importAllConfirm: ({ boards, notes }) => `Importar ${boards} quadro(s) com ${notes} nota(s) no total.\n\nIsso vai substituir TODOS os seus quadros atuais. Continuar?`,
+    importSuccess: ({ boards }) => `${boards} quadro(s) importado(s) com sucesso!`,
     importBoardConfirm: 'Importar vai substituir as notas do quadro atual. Continuar?',
     unrecognizedFileFormat: 'Formato de arquivo não reconhecido.',
     importError: ({ message }) => `Não foi possível importar esse arquivo: ${message}`,
@@ -115,44 +115,44 @@ const TRANSLATIONS = {
   en: {
     documentTitle: 'Floating Notes',
     metaDescription: 'Floating notes app with boards, links between notes, search, zoom, and calendar.',
-    addNote: '+ New note',
+    addNote: 'New note',
     addNoteTitle: 'Create a new note',
-    undo: '↺ Undo',
+    undo: 'Undo',
     undoTitle: 'Undo (Ctrl+Z)',
-    redo: '↻ Redo',
+    redo: 'Redo',
     redoTitle: 'Redo (Ctrl+Shift+Z or Ctrl+Y)',
-    linkMode: '🔗 Link',
+    linkMode: 'Link',
     linkModeTitle: 'Enable note linking mode',
     calendarTitle: 'Show/hide calendar',
     boardSelectTitle: 'Switch board',
-    addBoard: '+ Board',
+    addBoard: 'Board',
     addBoardTitle: 'New board',
     renameBoardTitle: 'Rename board',
     searchPlaceholder: 'Search notes... (Enter to navigate)',
     zoomOutTitle: 'Zoom out',
     zoomInTitle: 'Zoom in',
     zoomResetTitle: 'Reset view',
-    saved: '💾 Saved',
-    saveError: '⚠ Save error',
-    settings: '⚙ Settings',
+    saved: 'Saved',
+    saveError: 'Save error',
+    settings: 'Settings',
     settingsTitle: 'Settings',
     close: 'Close',
-    backup: '💾 Backup',
-    exportAll: '⬇ Export all',
+    backup: 'Backup',
+    exportAll: 'Export all',
     exportAllTitle: 'Download a JSON backup with all boards',
-    exportBoard: '⬇ Export current board',
+    exportBoard: 'Export current board',
     exportBoardTitle: 'Download a JSON backup of the current board only',
-    importBackup: '⬆ Import backup',
+    importBackup: 'Import backup',
     importBackupTitle: 'Load a JSON backup',
-    appearance: '🎨 Appearance',
-    darkMode: '🌙 Dark mode',
+    appearance: 'Appearance',
+    darkMode: 'Dark mode',
     darkModeTitle: 'Toggle dark mode',
-    language: '🌐 Language',
+    language: 'Language',
     languageLabel: 'Interface language',
     languageTitle: 'Choose language',
     languagePt: 'Português (Brasil)',
     languageEn: 'English',
-    delete: '🗑 Delete',
+    delete: 'Delete',
     clearBoard: 'Clear notes from current board',
     clearBoardTitle: 'Delete all notes from the current board',
     deleteBoard: 'Delete current board',
@@ -160,13 +160,13 @@ const TRANSLATIONS = {
     previousMonth: 'Previous month',
     nextMonth: 'Next month',
     calendarFoot: 'Click a day to insert it into the active note',
-    createLink: '🔗 Create link',
+    createLink: 'Create link',
     linkPlaceholder: 'Paste a URL or local path...',
     insertLink: 'Insert link',
     cancel: 'Cancel',
     file: 'File',
     fileLower: 'file',
-    closeEsc: '✕ Close',
+    closeEsc: 'Close',
     closeEscTitle: 'Close (Esc)',
     defaultBoard: ({ n }) => `Board ${n}`,
     boardFallback: 'Board',
@@ -176,16 +176,16 @@ const TRANSLATIONS = {
     confirmDeleteBoard: ({ name }) => `Delete the board "${name}" and all its notes?`,
     previewUnavailable: 'Preview unavailable.',
     previewUnavailableType: 'Preview unavailable for this file type.',
-    saveChanges: '💾 Save changes to note',
+    saveChanges: 'Save changes to note',
     discard: 'Discard',
     editHint: 'Edit the text above and save to update the note',
-    savedShort: '✅ Saved!',
+    savedShort: 'Saved!',
     downloadFile: 'Download file',
     siteCannotEmbed: 'This site cannot be displayed here.',
-    openNewTab: 'Open in new tab ↗',
-    imageTooLarge: ({ name }) => `📎 ${name} (image is too large to import)`,
-    textFileTooLarge: ({ name }) => `📎 ${name} (file is too large to import its contents)`,
-    pdfTooLarge: ({ name }) => `📄 ${name} (PDF is too large to import)`,
+    openNewTab: 'Open in new tab',
+    imageTooLarge: ({ name }) => `${name} (image is too large to import)`,
+    textFileTooLarge: ({ name }) => `${name} (file is too large to import its contents)`,
+    pdfTooLarge: ({ name }) => `${name} (PDF is too large to import)`,
     dragExplorerToOpen: 'Drag from File Explorer to open',
     folder: 'Folder',
     stats: ({ notes, links }) => `${notes} note${notes === 1 ? '' : 's'} · ${links} link${links === 1 ? '' : 's'}`,
@@ -195,7 +195,7 @@ const TRANSLATIONS = {
     noteColor: 'Note color',
     insertDate: 'Insert date',
     makeLink: 'Turn selected text into a link',
-    linkButton: '🔗 Link',
+    linkButton: 'Link',
     openLink: 'Open link (Shift+click opens in browser)',
     deleteNote: 'Delete',
     notePlaceholder: 'Write something...',
@@ -204,8 +204,8 @@ const TRANSLATIONS = {
     colorNumber: ({ n }) => `Color ${n}`,
     colors: ['Yellow', 'Orange', 'Red', 'Light pink', 'Dark pink', 'Purple', 'Blue', 'Cyan', 'Light green', 'Dark green', 'Brown', 'Gray'],
     confirmClearBoard: 'Delete all notes from this board?',
-    importAllConfirm: ({ boards, notes }) => `Import ${boards} board(s) with ${notes} note(s) total.\n\n⚠️ This will replace ALL your current boards. Continue?`,
-    importSuccess: ({ boards }) => `✅ ${boards} board(s) imported successfully!`,
+    importAllConfirm: ({ boards, notes }) => `Import ${boards} board(s) with ${notes} note(s) total.\n\nThis will replace ALL your current boards. Continue?`,
+    importSuccess: ({ boards }) => `${boards} board(s) imported successfully!`,
     importBoardConfirm: 'Importing will replace the notes on the current board. Continue?',
     unrecognizedFileFormat: 'Unrecognized file format.',
     importError: ({ message }) => `Could not import this file: ${message}`,
@@ -535,6 +535,7 @@ function flashSaveIndicator(ok) {
   if (!el) return;
 
   el.textContent = ok ? t('saved') : t('saveError');
+  el.dataset.status = ok ? 'saved' : 'error';
   el.classList.add('show');
 
   clearTimeout(saveIndicatorTimeout);
@@ -844,11 +845,11 @@ function closeFileViewer() {
 function getFileIcon(mime, name) {
   if (!mime) mime = '';
   if (!name) name = '';
-  if (mime.startsWith('image/')) return '🖼️';
-  if (mime === 'application/pdf') return '📄';
-  if (mime.startsWith('text/') || /\.(txt|md|log|csv|json)$/i.test(name)) return '📝';
-  if (/\.(zip|rar|7z|tar|gz)$/i.test(name)) return '📦';
-  return '📎';
+  if (mime.startsWith('image/')) return '<span class="ui-icon icon-image" aria-hidden="true"></span>';
+  if (mime === 'application/pdf') return '<span class="ui-icon icon-file" aria-hidden="true"></span>';
+  if (mime.startsWith('text/') || /\.(txt|md|log|csv|json)$/i.test(name)) return '<span class="ui-icon icon-file" aria-hidden="true"></span>';
+  if (/\.(zip|rar|7z|tar|gz)$/i.test(name)) return '<span class="ui-icon icon-archive" aria-hidden="true"></span>';
+  return '<span class="ui-icon icon-attachment" aria-hidden="true"></span>';
 }
 
 function openFileViewer(dataUrl, fileName, mimeType, noteRef) {
@@ -857,7 +858,7 @@ function openFileViewer(dataUrl, fileName, mimeType, noteRef) {
   fileViewerOverlay.classList.remove('hidden');
 
   if (!dataUrl) {
-    fileViewerBody.innerHTML = `<div class="viewer-placeholder"><span class="ph-icon">📎</span><p>${t('previewUnavailable')}</p></div>`;
+    fileViewerBody.innerHTML = `<div class="viewer-placeholder"><span class="ph-icon"><span class="ui-icon icon-attachment" aria-hidden="true"></span></span><p>${t('previewUnavailable')}</p></div>`;
     return;
   }
 
@@ -997,7 +998,7 @@ function openUrlViewer(url) {
 
 function showUrlFallback(url) {
   fileViewerBody.innerHTML = `<div class="viewer-placeholder">
-    <span class="ph-icon">🔗</span>
+    <span class="ph-icon"><span class="ui-icon icon-link" aria-hidden="true"></span></span>
     <p>${t('siteCannotEmbed')}</p>
     <a id="open-external-link">${t('openNewTab')}</a>
   </div>`;
@@ -1090,7 +1091,7 @@ viewport.addEventListener('drop', e => {
         }
         const reader = new FileReader();
         reader.onload = () => createNote(x, y, {
-          text: `📄 ${file.name}`,
+          text: `${file.name}`,
           fileData: reader.result,
           fileName: file.name,
           fileMime: 'application/pdf'
@@ -1111,13 +1112,13 @@ viewport.addEventListener('drop', e => {
             : null;
           createNote(x, y, {
             text: dirUrl
-              ? `[📁 ${file.name}](${dirUrl})`
-              : `📁 ${file.name}\n(${t('dragExplorerToOpen')})`,
+              ? `[${file.name}](${dirUrl})`
+              : `${file.name}\n(${t('dragExplorerToOpen')})`,
             fileName: file.name,
             fileMime: 'inode/directory'
           });
         } else {
-          createNote(x, y, { text: `📎 ${file.name}` });
+          createNote(x, y, { text: `${file.name}` });
         }
       }
     });
@@ -1131,7 +1132,7 @@ viewport.addEventListener('drop', e => {
     if (isDir) {
       const dirName = dropped.split('/').filter(Boolean).pop() || t('folder');
       createNote(p.x - 110, p.y - 20, {
-        text: `[📁 ${decodeURIComponent(dirName)}](${dropped})`,
+        text: `[${decodeURIComponent(dirName)}](${dropped})`,
         fileMime: 'inode/directory'
       });
     } else {
@@ -1193,7 +1194,7 @@ function bringToFront(el) {
 
 /* ===== NOTAS ===== */
 
-// Cores de accent do botão 🔗 Link — 1 entrada por NOTE_COLORS
+// Cores de accent do botão Link — 1 entrada por NOTE_COLORS
 const LINK_BTN_COLORS = [
   { light: { bg: '#ffe034', border: '#c9a020', color: '#3a2f00' }, dark: { bg: '#504818', border: '#988030', color: '#ffe090' } }, // Amarelo
   { light: { bg: '#ffbb70', border: '#c07020', color: '#3a1800' }, dark: { bg: '#503018', border: '#a06020', color: '#ffd890' } }, // Laranja
@@ -1231,7 +1232,7 @@ function applyNoteColor(el, handle, colorIndex) {
   const delBtn = el.querySelector('.del');
   if (delBtn) delBtn.style.color = isDark ? '#ff9a9a' : '#844';
 
-  // Botão 🔗 Link: cor de accent baseada na cor da nota
+  // Botão Link: cor de accent baseada na cor da nota
   const mlb = el.querySelector('.make-link-btn');
   if (mlb) {
     const lc = (LINK_BTN_COLORS[colorIndex] || LINK_BTN_COLORS[0]);
@@ -1264,18 +1265,18 @@ function renderNote(note) {
     ? `<div class="note-file-preview" data-action="open-file">
          <span class="file-icon">${getFileIcon(note.fileMime, note.fileName)}</span>
          <span class="file-name" title="${escapeHtml(note.fileName || t('fileLower'))}">${escapeHtml(note.fileName || t('fileLower'))}</span>
-         <span class="file-open-btn">👁 ${t('view')}</span>
+         <span class="file-open-btn">${t('view')}</span>
        </div>`
     : '';
 
   el.innerHTML = `
     <div class="handle">
-      <button class="pin-btn" title="${t(note.pinned ? 'unpinNote' : 'pinNote')}">${note.pinned ? '📌' : '📍'}</button>
-      <button class="color-btn" title="${t('noteColor')}">🎨</button>
-      <button class="cal-btn" title="${t('insertDate')}">📅</button>
+      <button class="pin-btn" title="${t(note.pinned ? 'unpinNote' : 'pinNote')}"></button>
+      <button class="color-btn" title="${t('noteColor')}"></button>
+      <button class="cal-btn" title="${t('insertDate')}"></button>
       <button class="make-link-btn" title="${t('makeLink')}">${t('linkButton')}</button>
-      <button class="link-open-btn" title="${t('openLink')}" style="display:${isUrl(note.text) ? 'inline-flex' : 'none'}">↗</button>
-      <button class="del" title="${t('deleteNote')}">✕</button>
+      <button class="link-open-btn" title="${t('openLink')}" style="display:${isUrl(note.text) ? 'inline-flex' : 'none'}"></button>
+      <button class="del" title="${t('deleteNote')}"></button>
     </div>
 
     ${filePreviewHtml}
@@ -1305,7 +1306,7 @@ function renderNote(note) {
     }
   });
 
-  // Botão "🔗 Link" — abre popup para transformar texto selecionado em link Markdown
+  // Botão "Link" — abre popup para transformar texto selecionado em link Markdown
   makeLinkBtn.addEventListener('click', e => {
     e.stopPropagation();
     openLocalLinkPopup(ta, el);
@@ -1346,12 +1347,11 @@ function renderNote(note) {
       badge.dataset.local = link.isLocal;
 
       // Ícone + label truncado
-      const icon = link.isLocal ? '📁' : '🔗';
       const label = link.text.length > 28 ? link.text.slice(0, 26) + '…' : link.text;
 
       const mainSpan = document.createElement('span');
       mainSpan.className = 'link-badge-label';
-      mainSpan.textContent = icon + ' ' + label;
+      mainSpan.textContent = label;
 
       mainSpan.addEventListener('click', e => {
         e.preventDefault();
@@ -1373,7 +1373,6 @@ function renderNote(note) {
       const removeBtn = document.createElement('button');
       removeBtn.className = 'link-badge-remove';
       removeBtn.title = t('removeLink');
-      removeBtn.textContent = '×';
       removeBtn.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
@@ -1478,7 +1477,6 @@ function renderNote(note) {
     note.pinned = !note.pinned;
 
     el.classList.toggle('pinned', note.pinned);
-    pinBtn.textContent = note.pinned ? '📌' : '📍';
     pinBtn.title = t(note.pinned ? 'unpinNote' : 'pinNote');
 
     save();
@@ -2457,7 +2455,7 @@ function insertDateIntoActiveNote(y, m, d) {
     const after = el.value.slice(end);
 
     const insert =
-      (before && !before.endsWith(' ') && !before.endsWith('\n') ? ' ' : '') + `📅 ${dateStr} `;
+      (before && !before.endsWith(' ') && !before.endsWith('\n') ? ' ' : '') + `${dateStr} `;
 
     el.focus();
     el.setSelectionRange(start, end);
