@@ -575,6 +575,67 @@ body.dark .note.multi-selected {
   color: #666;
 }
 
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #444;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-check input {
+  margin: 0;
+}
+
+#snapshotInterval {
+  margin-bottom: 6px;
+}
+
+.snapshot-select-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.snapshot-select-row #snapshotSelect {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.settings-section .snapshot-delete-btn {
+  width: 30px;
+  min-width: 30px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #a83232;
+  background: #fff5f5;
+  border-color: #e0b0b0;
+}
+
+.settings-section .snapshot-delete-btn:hover:not(:disabled) {
+  background: #ffe4e4;
+}
+
+.snapshot-delete-btn::before {
+  margin-right: 0 !important;
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.settings-section button:disabled,
+.settings-section select:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .settings-section select {
   display: block;
   width: 100%;
@@ -1153,7 +1214,7 @@ body.dark .viewer-discard-btn:hover:not(:disabled) { background: #333; }
   background: rgba(122, 79, 190, 0.1);
 }
 
-/* Botão "🔗 Criar link" dentro do handle da nota */
+/* Botão de criar link dentro do handle da nota */
 .make-link-btn {
   font-size: 12px;
   padding: 2px 5px;
@@ -1322,6 +1383,10 @@ body.dark .settings-label {
   color: #aaa;
 }
 
+body.dark .settings-check {
+  color: #ddd;
+}
+
 body.dark .settings-section select {
   background: #2a2a2a;
   border-color: #444;
@@ -1335,5 +1400,15 @@ body.dark .settings-section--danger button {
 }
 
 body.dark .settings-section--danger button:hover {
+  background: #4a1818;
+}
+
+body.dark .settings-section .snapshot-delete-btn {
+  background: #3a1010;
+  border-color: #6a2828;
+  color: #ffb0b0;
+}
+
+body.dark .settings-section .snapshot-delete-btn:hover:not(:disabled) {
   background: #4a1818;
 }

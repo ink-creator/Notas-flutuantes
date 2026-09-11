@@ -43,9 +43,11 @@
 #saveIndicator { --icon: var(--icon-check); }
 #saveIndicator[data-status="error"] { --icon: var(--icon-warning); }
 #settingsToggle, #settingsHeaderText { --icon: var(--icon-settings); }
-#settingsClose, #file-viewer-close, .note .del, .link-badge-remove { --icon: var(--icon-close); }
-#backupHeading, .viewer-save-btn { --icon: var(--icon-save); }
-#exportNotes, #exportBoardNotes { --icon: var(--icon-download); }
+#settingsClose, #file-viewer-close, #deleteSnapshot, .note .del, .link-badge-remove { --icon: var(--icon-close); }
+#backupHeading, .viewer-save-btn, #saveSnapshotNow { --icon: var(--icon-save); }
+#historyHeading { --icon: var(--icon-archive); }
+#restoreSnapshot { --icon: var(--icon-reset); }
+#exportNotes, #exportBoardNotes, #exportSnapshot { --icon: var(--icon-download); }
 #importNotes { --icon: var(--icon-upload); }
 #appearanceHeading, .color-btn { --icon: var(--icon-palette); }
 #darkMode { --icon: var(--icon-moon); }
@@ -100,9 +102,9 @@
 #saveIndicator,
 #saveIndicator[data-status="error"],
 #settingsToggle, #settingsHeaderText,
-#settingsClose, #file-viewer-close, .note .del, .link-badge-remove,
-#backupHeading, .viewer-save-btn,
-#exportNotes, #exportBoardNotes,
+#settingsClose, #file-viewer-close, #deleteSnapshot, .note .del, .link-badge-remove,
+#backupHeading, #historyHeading, #saveSnapshotNow, #restoreSnapshot, .viewer-save-btn,
+#exportNotes, #exportBoardNotes, #exportSnapshot,
 #importNotes,
 #appearanceHeading, .color-btn,
 #darkMode,
@@ -130,7 +132,7 @@
 
 :where(#addNote, #addBoard, #undoBtn, #redoBtn, #linkMode, #saveIndicator,
     #settingsToggle, #settingsHeaderText, .settings-section h4,
-    #exportNotes, #exportBoardNotes, #importNotes, #darkMode,
+    #saveSnapshotNow, #restoreSnapshot, #exportNotes, #exportBoardNotes, #exportSnapshot, #importNotes, #darkMode,
     #llp-label, #file-viewer-close, .viewer-save-btn, .make-link-btn,
     .file-open-btn, .link-badge-label)::before {
   margin-right: 6px;

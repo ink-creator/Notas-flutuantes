@@ -56,6 +56,29 @@
     </div>
 
     <div class="settings-section">
+      <h4 id="historyHeading">Histórico e recuperação</h4>
+      <label class="settings-check" for="autoSnapshots">
+        <input type="checkbox" id="autoSnapshots" />
+        <span id="autoSnapshotsLabel">Versões automáticas</span>
+      </label>
+      <label class="settings-label" id="snapshotIntervalLabel" for="snapshotInterval">Intervalo</label>
+      <select id="snapshotInterval" title="Intervalo das versões automáticas">
+        <option value="1">1 minuto</option>
+        <option value="5">5 minutos</option>
+        <option value="15">15 minutos</option>
+        <option value="30">30 minutos</option>
+      </select>
+      <button id="saveSnapshotNow" title="Salvar uma versão de recuperação agora">Salvar versão agora</button>
+      <label class="settings-label" id="snapshotSelectLabel" for="snapshotSelect">Versões salvas</label>
+      <div class="snapshot-select-row">
+        <select id="snapshotSelect" title="Escolher versão salva"></select>
+        <button id="deleteSnapshot" class="snapshot-delete-btn" title="Excluir versão selecionada" aria-label="Excluir versão selecionada"></button>
+      </div>
+      <button id="restoreSnapshot" title="Restaurar a versão selecionada em todos os quadros">Restaurar versão selecionada</button>
+      <button id="exportSnapshot" title="Exportar todos os quadros exatamente como estavam na versão selecionada">Exportar versão selecionada</button>
+    </div>
+
+    <div class="settings-section">
       <h4 id="appearanceHeading">Aparência</h4>
       <button id="darkMode" title="Alternar modo escuro">Modo escuro</button>
     </div>
@@ -117,6 +140,7 @@
     </div>
   </div>
 
+  <script src="storage.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

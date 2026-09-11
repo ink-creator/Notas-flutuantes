@@ -9,6 +9,9 @@ const BOARDS_KEY = 'notas-flutuantes:boards';
 const CURRENT_BOARD_KEY = 'notas-flutuantes:current-board';
 
 const LANGUAGE_KEY = 'notas-flutuantes:language';
+const AUTO_SNAPSHOTS_KEY = 'notas-flutuantes:auto-snapshots';
+const SNAPSHOT_INTERVAL_KEY = 'notas-flutuantes:snapshot-interval';
+const RECOVERY_PREFIX = 'notas-flutuantes:recovery:';
 
 const TRANSLATIONS = {
   'pt-BR': {
@@ -43,6 +46,28 @@ const TRANSLATIONS = {
     exportBoardTitle: 'Baixar backup apenas do quadro atual em JSON',
     importBackup: 'Importar backup',
     importBackupTitle: 'Carregar backup em JSON',
+    history: 'Histórico e recuperação',
+    autoSnapshots: 'Versões automáticas',
+    snapshotInterval: 'Intervalo',
+    snapshotIntervalTitle: 'Intervalo das versões automáticas',
+    saveSnapshotNow: 'Salvar versão agora',
+    saveSnapshotNowTitle: 'Salvar uma versão de recuperação agora',
+    savedVersions: 'Versões salvas',
+    snapshotSelectTitle: 'Escolher versão salva',
+    restoreSnapshot: 'Restaurar versão selecionada',
+    restoreSnapshotTitle: 'Restaurar a versão selecionada em todos os quadros',
+    exportSnapshot: 'Exportar versão selecionada',
+    exportSnapshotTitle: 'Exportar todos os quadros exatamente como estavam na versão selecionada',
+    deleteSnapshotTitle: 'Excluir versão selecionada',
+    confirmDeleteSnapshot: 'Excluir esta versão? Você poderá recuperá-la com Ctrl+Z.',
+    noSnapshots: 'Nenhuma versão salva',
+    automaticSnapshot: 'Automática',
+    manualSnapshot: 'Manual',
+    confirmRestoreSnapshot: 'Restaurar esta versão em TODOS os quadros? O estado atual poderá ser desfeito com Ctrl+Z.',
+    snapshotSaved: 'Versão salva.',
+    snapshotSaveError: 'Não foi possível salvar a versão.',
+    intervalMinute: '1 minuto',
+    intervalMinutes: ({ n }) => `${n} minutos`,
     appearance: 'Aparência',
     darkMode: 'Modo escuro',
     darkModeTitle: 'Alternar modo escuro',
@@ -144,6 +169,28 @@ const TRANSLATIONS = {
     exportBoardTitle: 'Download a JSON backup of the current board only',
     importBackup: 'Import backup',
     importBackupTitle: 'Load a JSON backup',
+    history: 'History and recovery',
+    autoSnapshots: 'Automatic versions',
+    snapshotInterval: 'Interval',
+    snapshotIntervalTitle: 'Automatic version interval',
+    saveSnapshotNow: 'Save version now',
+    saveSnapshotNowTitle: 'Save a recovery version now',
+    savedVersions: 'Saved versions',
+    snapshotSelectTitle: 'Choose a saved version',
+    restoreSnapshot: 'Restore selected version',
+    restoreSnapshotTitle: 'Restore the selected version across all boards',
+    exportSnapshot: 'Export selected version',
+    exportSnapshotTitle: 'Export all boards exactly as they were in the selected version',
+    deleteSnapshotTitle: 'Delete selected version',
+    confirmDeleteSnapshot: 'Delete this version? You can recover it with Ctrl+Z.',
+    noSnapshots: 'No saved versions',
+    automaticSnapshot: 'Automatic',
+    manualSnapshot: 'Manual',
+    confirmRestoreSnapshot: 'Restore this version across ALL boards? You can undo the current state with Ctrl+Z.',
+    snapshotSaved: 'Version saved.',
+    snapshotSaveError: 'Could not save the version.',
+    intervalMinute: '1 minute',
+    intervalMinutes: ({ n }) => `${n} minutes`,
     appearance: 'Appearance',
     darkMode: 'Dark mode',
     darkModeTitle: 'Toggle dark mode',
@@ -262,6 +309,14 @@ function applyStaticTranslations() {
   setText('exportNotes', 'exportAll'); setAttr('exportNotes', 'title', 'exportAllTitle');
   setText('exportBoardNotes', 'exportBoard'); setAttr('exportBoardNotes', 'title', 'exportBoardTitle');
   setText('importNotes', 'importBackup'); setAttr('importNotes', 'title', 'importBackupTitle');
+  setText('historyHeading', 'history');
+  setText('autoSnapshotsLabel', 'autoSnapshots');
+  setText('snapshotIntervalLabel', 'snapshotInterval'); setAttr('snapshotInterval', 'title', 'snapshotIntervalTitle');
+  setText('saveSnapshotNow', 'saveSnapshotNow'); setAttr('saveSnapshotNow', 'title', 'saveSnapshotNowTitle');
+  setText('snapshotSelectLabel', 'savedVersions'); setAttr('snapshotSelect', 'title', 'snapshotSelectTitle');
+  setAttr('deleteSnapshot', 'title', 'deleteSnapshotTitle'); setAttr('deleteSnapshot', 'aria-label', 'deleteSnapshotTitle');
+  setText('restoreSnapshot', 'restoreSnapshot'); setAttr('restoreSnapshot', 'title', 'restoreSnapshotTitle');
+  setText('exportSnapshot', 'exportSnapshot'); setAttr('exportSnapshot', 'title', 'exportSnapshotTitle');
   setText('appearanceHeading', 'appearance');
   setText('darkMode', 'darkMode'); setAttr('darkMode', 'title', 'darkModeTitle');
   setText('languageHeading', 'language'); setText('languageLabel', 'languageLabel'); setAttr('languageSelect', 'title', 'languageTitle');
@@ -273,6 +328,14 @@ function applyStaticTranslations() {
   setText('llp-label', 'createLink'); setAttr('llp-url-input', 'placeholder', 'linkPlaceholder');
   setText('llp-confirm', 'insertLink'); setText('llp-cancel', 'cancel');
   setText('file-viewer-close', 'closeEsc'); setAttr('file-viewer-close', 'title', 'closeEscTitle');
+
+  const snapshotInterval = document.getElementById('snapshotInterval');
+  if (snapshotInterval) {
+    snapshotInterval.querySelectorAll('option').forEach(option => {
+      const n = Number(option.value);
+      option.textContent = n === 1 ? t('intervalMinute') : t('intervalMinutes', { n });
+    });
+  }
 
   const languageSelect = document.getElementById('languageSelect');
   if (languageSelect) {
@@ -296,6 +359,7 @@ function setLanguage(language) {
   applyStaticTranslations();
   render();
   if (!document.getElementById('calendar').classList.contains('hidden')) renderCalendar();
+  if (appReady) refreshSnapshotList();
 }
 
 
@@ -409,7 +473,7 @@ function readLegacyData() {
   }
 }
 
-function loadBoardData(id) {
+function loadLegacyBoardData(id) {
   try {
     const raw = localStorage.getItem(boardDataKey(id));
     if (raw) {
@@ -421,38 +485,148 @@ function loadBoardData(id) {
       };
     }
   } catch {}
+  return null;
+}
 
-  return { notes: [], links: [], nextId: 1 };
+function recoveryKey(id) {
+  return RECOVERY_PREFIX + id;
+}
+
+function readRecoveryState(id) {
+  try {
+    const raw = localStorage.getItem(recoveryKey(id));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.state || !Array.isArray(parsed.state.notes)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeRecoveryState(id, boardState, savedAt = Date.now()) {
+  try {
+    localStorage.setItem(recoveryKey(id), JSON.stringify({
+      savedAt,
+      state: NotesStorage.cleanState(boardState)
+    }));
+  } catch (err) {
+    console.warn('Não foi possível gravar o estado de recuperação:', err);
+  }
+}
+
+async function loadBoardData(id) {
+  const recovery = readRecoveryState(id);
+  if (recovery) {
+    const recovered = NotesStorage.cleanState(recovery.state);
+    try {
+      await NotesStorage.saveBoard(id, recovered);
+      localStorage.removeItem(recoveryKey(id));
+    } catch {}
+    return recovered;
+  }
+
+  const stored = await NotesStorage.loadBoard(id);
+  if (stored) return stored;
+
+  let legacy = loadLegacyBoardData(id);
+  if (!legacy && id === 'default') legacy = readLegacyData();
+
+  const migrated = await NotesStorage.migrateState(
+    id,
+    legacy || { notes: [], links: [], nextId: 1 }
+  );
+
+  await NotesStorage.saveBoard(id, migrated);
+  localStorage.removeItem(boardDataKey(id));
+  if (id === 'default') localStorage.removeItem(LEGACY_KEY);
+  return migrated;
 }
 
 let boards = loadBoardsList();
-
-if (!boards) {
-  // Primeira vez com o sistema de quadros: migra dados antigos (quadro único) se existirem
+if (!boards || !boards.length) {
   boards = [{ id: 'default', name: t('defaultBoard', { n: 1 }) }];
-
-  const legacy = readLegacyData();
-  localStorage.setItem(
-    boardDataKey('default'),
-    JSON.stringify(legacy || { notes: [], links: [], nextId: 1 })
-  );
-
   saveBoardsList();
 }
 
 let currentBoardId = localStorage.getItem(CURRENT_BOARD_KEY) || boards[0].id;
+if (!boards.find(b => b.id === currentBoardId)) currentBoardId = boards[0].id;
 
-if (!boards.find(b => b.id === currentBoardId)) {
-  currentBoardId = boards[0].id;
+let state = { notes: [], links: [], nextId: 1 };
+let appReady = false;
+let snapshotDirty = false;
+
+const pendingBoardSaves = new Map();
+const boardSaveTimers = new Map();
+const SAVE_DELAY_MS = 180;
+let saveIndicatorTimeout = null;
+
+function scheduleBoardSave(boardId, boardState) {
+  const savedAt = Date.now();
+  const clean = NotesStorage.cleanState(boardState);
+  pendingBoardSaves.set(boardId, { state: clean, savedAt });
+  writeRecoveryState(boardId, clean, savedAt);
+
+  const oldTimer = boardSaveTimers.get(boardId);
+  if (oldTimer) clearTimeout(oldTimer);
+  boardSaveTimers.set(boardId, setTimeout(() => {
+    flushBoardSave(boardId);
+  }, SAVE_DELAY_MS));
 }
 
-let state = loadBoardData(currentBoardId);
+async function flushBoardSave(boardId) {
+  const timer = boardSaveTimers.get(boardId);
+  if (timer) clearTimeout(timer);
+  boardSaveTimers.delete(boardId);
 
-function switchBoard(id) {
+  const pending = pendingBoardSaves.get(boardId);
+  if (!pending) return true;
+  pendingBoardSaves.delete(boardId);
+
+  try {
+    await NotesStorage.saveBoard(boardId, pending.state);
+    const recovery = readRecoveryState(boardId);
+    if (recovery && recovery.savedAt === pending.savedAt) {
+      localStorage.removeItem(recoveryKey(boardId));
+    }
+    if (boardId === currentBoardId) flashSaveIndicator(true);
+    return true;
+  } catch (err) {
+    console.error('Falha ao salvar notas:', err);
+    if (boardId === currentBoardId) flashSaveIndicator(false);
+    return false;
+  }
+}
+
+async function flushAllPendingSaves() {
+  await Promise.all([...pendingBoardSaves.keys()].map(id => flushBoardSave(id)));
+}
+
+function save() {
+  if (!appReady) return;
+  snapshotDirty = true;
+  scheduleBoardSave(currentBoardId, state);
+}
+
+function flashSaveIndicator(ok) {
+  const el = document.getElementById('saveIndicator');
+  if (!el) return;
+
+  el.textContent = ok ? t('saved') : t('saveError');
+  el.dataset.status = ok ? 'saved' : 'error';
+  el.classList.add('show');
+
+  clearTimeout(saveIndicatorTimeout);
+  saveIndicatorTimeout = setTimeout(() => el.classList.remove('show'), 1200);
+}
+
+async function switchBoard(id) {
+  if (!boards.find(b => b.id === id)) return;
+  if (appReady) await flushBoardSave(currentBoardId);
+
   currentBoardId = id;
   localStorage.setItem(CURRENT_BOARD_KEY, id);
-
-  state = loadBoardData(id);
+  state = await loadBoardData(id);
   activeNoteId = null;
   linkPick = null;
   linkMode = false;
@@ -467,23 +641,23 @@ function switchBoard(id) {
   resetView();
   renderBoardSelect();
   render();
+  refreshSnapshotList();
 }
 
-document.getElementById('boardSelect').addEventListener('change', e => {
-  switchBoard(e.target.value);
+document.getElementById('boardSelect').addEventListener('change', async e => {
+  await switchBoard(e.target.value);
 });
 
-document.getElementById('addBoard').addEventListener('click', () => {
+document.getElementById('addBoard').addEventListener('click', async () => {
   const name = prompt(t('newBoardPrompt'), t('defaultBoard', { n: boards.length + 1 }));
   if (!name) return;
 
   const id = 'b' + Date.now();
   boards.push({ id, name: name.trim() || t('defaultBoard', { n: boards.length + 1 }) });
-
   saveBoardsList();
-  localStorage.setItem(boardDataKey(id), JSON.stringify({ notes: [], links: [], nextId: 1 }));
-
-  switchBoard(id);
+  await NotesStorage.saveBoard(id, { notes: [], links: [], nextId: 1 });
+  snapshotDirty = true;
+  await switchBoard(id);
 });
 
 document.getElementById('renameBoard').addEventListener('click', () => {
@@ -495,10 +669,11 @@ document.getElementById('renameBoard').addEventListener('click', () => {
 
   board.name = name.trim();
   saveBoardsList();
+  snapshotDirty = true;
   renderBoardSelect();
 });
 
-document.getElementById('deleteBoard').addEventListener('click', () => {
+document.getElementById('deleteBoard').addEventListener('click', async () => {
   if (boards.length <= 1) {
     alert(t('cannotDeleteLastBoard'));
     return;
@@ -506,41 +681,29 @@ document.getElementById('deleteBoard').addEventListener('click', () => {
 
   const board = boards.find(b => b.id === currentBoardId);
   if (!board) return;
-
   if (!confirm(t('confirmDeleteBoard', { name: board.name }))) return;
 
-  localStorage.removeItem(boardDataKey(currentBoardId));
-  boards = boards.filter(b => b.id !== currentBoardId);
-  saveBoardsList();
+  const deletedId = currentBoardId;
+  pendingBoardSaves.delete(deletedId);
+  const timer = boardSaveTimers.get(deletedId);
+  if (timer) clearTimeout(timer);
+  boardSaveTimers.delete(deletedId);
 
-  switchBoard(boards[0].id);
+  await NotesStorage.deleteBoard(deletedId);
+  localStorage.removeItem(boardDataKey(deletedId));
+  localStorage.removeItem(recoveryKey(deletedId));
+  boards = boards.filter(b => b.id !== deletedId);
+  saveBoardsList();
+  snapshotDirty = true;
+
+  await switchBoard(boards[0].id);
 });
 
-/* ===== SALVAR ===== */
-
-let saveIndicatorTimeout = null;
-
-function save() {
-  try {
-    localStorage.setItem(boardDataKey(currentBoardId), JSON.stringify(state));
-    flashSaveIndicator(true);
-  } catch (err) {
-    console.error('Falha ao salvar notas:', err);
-    flashSaveIndicator(false);
+window.addEventListener('pagehide', () => {
+  if (appReady && pendingBoardSaves.has(currentBoardId)) {
+    writeRecoveryState(currentBoardId, state);
   }
-}
-
-function flashSaveIndicator(ok) {
-  const el = document.getElementById('saveIndicator');
-  if (!el) return;
-
-  el.textContent = ok ? t('saved') : t('saveError');
-  el.dataset.status = ok ? 'saved' : 'error';
-  el.classList.add('show');
-
-  clearTimeout(saveIndicatorTimeout);
-  saveIndicatorTimeout = setTimeout(() => el.classList.remove('show'), 1200);
-}
+});
 
 /* ===== ZOOM & PAN ===== */
 
@@ -730,8 +893,7 @@ viewport.addEventListener('dblclick', e => {
 
 /* ===== ARRASTAR ARQUIVOS E LINKS PARA O QUADRO ===== */
 
-const MAX_TEXT_FILE_SIZE = 300 * 1024;  // 300KB
-const MAX_IMAGE_SIZE = 3 * 1024 * 1024; // 3MB (localStorage tem espaço limitado)
+const MAX_TEXT_INLINE_SIZE = 2 * 1024 * 1024; // 2MB; anexos maiores continuam armazenados, mas não viram texto da nota
 
 function isUrl(str) {
   return /^https?:\/\/\S+$/i.test((str || '').trim());
@@ -852,39 +1014,60 @@ function getFileIcon(mime, name) {
   return '<span class="ui-icon icon-attachment" aria-hidden="true"></span>';
 }
 
-function openFileViewer(dataUrl, fileName, mimeType, noteRef) {
-  fileViewerTitle.textContent = fileName || t('file');
+const attachmentUrlCache = new Map();
+
+async function getAttachmentObjectUrl(attachmentId) {
+  if (!attachmentId) return null;
+  if (attachmentUrlCache.has(attachmentId)) return attachmentUrlCache.get(attachmentId);
+  const attachment = await NotesStorage.getAttachment(attachmentId);
+  if (!attachment || !attachment.blob) return null;
+  const url = URL.createObjectURL(attachment.blob);
+  attachmentUrlCache.set(attachmentId, url);
+  return url;
+}
+
+function clearAttachmentObjectUrl(attachmentId) {
+  const url = attachmentUrlCache.get(attachmentId);
+  if (url) URL.revokeObjectURL(url);
+  attachmentUrlCache.delete(attachmentId);
+}
+
+async function openFileViewer(noteRef) {
+  const fileName = noteRef && noteRef.fileName ? noteRef.fileName : t('file');
+  const mimeType = noteRef && noteRef.fileMime ? noteRef.fileMime : '';
+  fileViewerTitle.textContent = fileName;
   fileViewerBody.innerHTML = '';
   fileViewerOverlay.classList.remove('hidden');
 
-  if (!dataUrl) {
+  if (!noteRef || !noteRef.attachmentId) {
     fileViewerBody.innerHTML = `<div class="viewer-placeholder"><span class="ph-icon"><span class="ui-icon icon-attachment" aria-hidden="true"></span></span><p>${t('previewUnavailable')}</p></div>`;
     return;
   }
 
-  if (mimeType && mimeType.startsWith('image/')) {
+  const attachment = await NotesStorage.getAttachment(noteRef.attachmentId);
+  if (!attachment || !attachment.blob) {
+    fileViewerBody.innerHTML = `<div class="viewer-placeholder"><span class="ph-icon"><span class="ui-icon icon-attachment" aria-hidden="true"></span></span><p>${t('previewUnavailable')}</p></div>`;
+    return;
+  }
+
+  const blob = attachment.blob;
+  const effectiveMime = mimeType || attachment.mime || blob.type || 'application/octet-stream';
+
+  if (effectiveMime.startsWith('image/')) {
     const img = document.createElement('img');
-    img.src = dataUrl;
+    img.src = await getAttachmentObjectUrl(noteRef.attachmentId);
     img.alt = fileName;
     fileViewerBody.appendChild(img);
 
-  } else if (mimeType === 'application/pdf') {
+  } else if (effectiveMime === 'application/pdf') {
     const iframe = document.createElement('iframe');
-    iframe.src = dataUrl;
+    iframe.src = await getAttachmentObjectUrl(noteRef.attachmentId);
     iframe.title = fileName;
     fileViewerBody.appendChild(iframe);
 
-  } else if (mimeType && (mimeType.startsWith('text/') || mimeType === 'application/json')) {
-    // Decodifica base64 → texto
-    let text = '';
-    try {
-      const base64 = dataUrl.split(',')[1];
-      text = base64 ? decodeURIComponent(escape(atob(base64))) : dataUrl;
-    } catch {
-      text = dataUrl;
-    }
+  } else if (effectiveMime.startsWith('text/') || effectiveMime === 'application/json' || /\.(txt|md|log|csv|json)$/i.test(fileName)) {
+    const text = await blob.text();
 
-    // Barra de ações do editor
     const bar = document.createElement('div');
     bar.className = 'viewer-edit-bar';
 
@@ -904,7 +1087,6 @@ function openFileViewer(dataUrl, fileName, mimeType, noteRef) {
 
     bar.append(saveBtn, discardBtn, hint);
 
-    // Textarea editável
     const ta = document.createElement('textarea');
     ta.className = 'viewer-textarea';
     ta.value = text;
@@ -918,23 +1100,23 @@ function openFileViewer(dataUrl, fileName, mimeType, noteRef) {
       discardBtn.disabled = !changed;
     });
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
       const newText = ta.value;
-      // Atualiza fileData (base64) e text da nota
-      const newB64 = btoa(unescape(encodeURIComponent(newText)));
-      const newDataUrl = `data:${mimeType};base64,` + newB64;
+      const newBlob = new Blob([newText], { type: effectiveMime || 'text/plain' });
 
       if (noteRef) {
+        pushUndoSnapshot();
+        const oldAttachmentId = noteRef.attachmentId;
+        const newAttachmentId = await NotesStorage.putAttachment(currentBoardId, newBlob, {
+          name: fileName,
+          mime: effectiveMime
+        });
+        noteRef.attachmentId = newAttachmentId;
+        clearAttachmentObjectUrl(oldAttachmentId);
         noteRef.text = newText;
-        noteRef.fileData = newDataUrl;
 
-        // Atualiza o textarea da nota no canvas
         const noteTa = canvas.querySelector(`.note[data-id="${noteRef.id}"] textarea`);
-        if (noteTa) {
-          noteTa.value = newText;
-          noteTa.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
+        if (noteTa) noteTa.value = newText;
         save();
       }
 
@@ -955,14 +1137,13 @@ function openFileViewer(dataUrl, fileName, mimeType, noteRef) {
     fileViewerBody.appendChild(bar);
 
   } else {
-    // Tipo desconhecido — oferece download
     const a = document.createElement('a');
-    a.href = dataUrl;
+    a.href = await getAttachmentObjectUrl(noteRef.attachmentId);
     a.download = fileName || t('fileLower');
     a.textContent = t('downloadFile');
 
     fileViewerBody.innerHTML = `<div class="viewer-placeholder">
-      <span class="ph-icon">${getFileIcon(mimeType, fileName)}</span>
+      <span class="ph-icon">${getFileIcon(effectiveMime, fileName)}</span>
       <p>${t('previewUnavailableType')}</p>
     </div>`;
     fileViewerBody.querySelector('.viewer-placeholder').appendChild(a);
@@ -1033,7 +1214,7 @@ viewport.addEventListener('dragover', e => {
   e.dataTransfer.dropEffect = 'copy';
 });
 
-viewport.addEventListener('drop', e => {
+viewport.addEventListener('drop', async e => {
   if (internalDrag) return;
 
   e.preventDefault();
@@ -1044,90 +1225,65 @@ viewport.addEventListener('drop', e => {
   const files = Array.from(e.dataTransfer.files || []);
 
   if (files.length) {
-    files.forEach((file, i) => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const x = p.x - 110 + i * 24;
       const y = p.y - 70 + i * 24;
 
-      if (file.type.startsWith('image/')) {
-        if (file.size > MAX_IMAGE_SIZE) {
-          createNote(x, y, { text: t('imageTooLarge', { name: file.name }) });
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = () => createNote(x, y, {
-          image: reader.result,
-          text: file.name,
-          fileData: reader.result,
-          fileName: file.name,
-          fileMime: file.type
-        });
-        reader.readAsDataURL(file);
+      const entry = e.dataTransfer.items && e.dataTransfer.items[i]
+        ? e.dataTransfer.items[i].webkitGetAsEntry && e.dataTransfer.items[i].webkitGetAsEntry()
+        : null;
 
-      } else if (file.type.startsWith('text/') || /\.(txt|md|csv|json|log)$/i.test(file.name)) {
-        if (file.size > MAX_TEXT_FILE_SIZE) {
-          createNote(x, y, { text: t('textFileTooLarge', { name: file.name }) });
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = () => {
-          // Guarda o texto completo como fileData (base64) para o visualizador/editor
-          // e usa o texto completo diretamente na nota
-          const fullText = reader.result;
-          const asB64 = btoa(unescape(encodeURIComponent(fullText)));
-          const dataUrl = `data:${file.type || 'text/plain'};base64,` + asB64;
+      if (entry && entry.isDirectory) {
+        const dirPath = file.path || file.name;
+        const dirUrl = file.path
+          ? (dirPath.startsWith('file://') ? dirPath : 'file://' + dirPath.replace(/\\/g, '/'))
+          : null;
+        createNote(x, y, {
+          text: dirUrl
+            ? `[${file.name}](${dirUrl})`
+            : `${file.name}\n(${t('dragExplorerToOpen')})`,
+          fileName: file.name,
+          fileMime: 'inode/directory'
+        });
+        continue;
+      }
+
+      try {
+        const attachmentId = await NotesStorage.putAttachment(currentBoardId, file, {
+          name: file.name,
+          mime: file.type || 'application/octet-stream'
+        });
+
+        if (file.type.startsWith('text/') || /\.(txt|md|csv|json|log)$/i.test(file.name)) {
+          const text = file.size <= MAX_TEXT_INLINE_SIZE
+            ? await file.text()
+            : t('textFileTooLarge', { name: file.name });
           createNote(x, y, {
-            text: fullText,           // texto completo, sem corte
-            fileData: dataUrl,
+            text,
+            attachmentId,
             fileName: file.name,
             fileMime: file.type || 'text/plain'
           });
-        };
-        reader.readAsText(file, 'UTF-8');
-
-      } else if (file.type === 'application/pdf') {
-        if (file.size > 10 * 1024 * 1024) {
-          createNote(x, y, { text: t('pdfTooLarge', { name: file.name }) });
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = () => createNote(x, y, {
-          text: `${file.name}`,
-          fileData: reader.result,
-          fileName: file.name,
-          fileMime: 'application/pdf'
-        });
-        reader.readAsDataURL(file);
-
-      } else {
-        // Verifica se pode ser uma pasta (webkitGetAsEntry)
-        const entry = e.dataTransfer.items && e.dataTransfer.items[i]
-          ? e.dataTransfer.items[i].webkitGetAsEntry()
-          : null;
-
-        if (entry && entry.isDirectory) {
-          // Pasta do PC: cria nota com link para o diretório
-          const dirPath = file.path || file.name; // Electron expõe file.path; navegador só tem name
-          const dirUrl = file.path
-            ? (dirPath.startsWith('file://') ? dirPath : 'file://' + dirPath.replace(/\\/g, '/'))
-            : null;
-          createNote(x, y, {
-            text: dirUrl
-              ? `[${file.name}](${dirUrl})`
-              : `${file.name}\n(${t('dragExplorerToOpen')})`,
-            fileName: file.name,
-            fileMime: 'inode/directory'
-          });
         } else {
-          createNote(x, y, { text: `${file.name}` });
+          createNote(x, y, {
+            text: file.name,
+            attachmentId,
+            fileName: file.name,
+            fileMime: file.type || 'application/octet-stream'
+          });
         }
+      } catch (err) {
+        console.error('Falha ao armazenar anexo:', err);
+        createNote(x, y, { text: file.name });
+        flashSaveIndicator(false);
       }
-    });
+    }
     return;
   }
 
   const dropped = (e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain') || '').trim();
   if (dropped) {
-    // Se for um caminho de diretório (file:// sem extensão, ou path local)
     const isDir = dropped.startsWith('file://') && !dropped.match(/\.[a-zA-Z0-9]{1,6}$/);
     if (isDir) {
       const dirName = dropped.split('/').filter(Boolean).pop() || t('folder');
@@ -1260,8 +1416,8 @@ function renderNote(note) {
   el.dataset.id = note.id;
   el.classList.toggle('pinned', !!note.pinned);
 
-  // Barra de preview de arquivo (se a nota tiver fileData)
-  const filePreviewHtml = note.fileData
+  // Barra de preview de arquivo (anexo armazenado no IndexedDB)
+  const filePreviewHtml = note.attachmentId
     ? `<div class="note-file-preview" data-action="open-file">
          <span class="file-icon">${getFileIcon(note.fileMime, note.fileName)}</span>
          <span class="file-name" title="${escapeHtml(note.fileName || t('fileLower'))}">${escapeHtml(note.fileName || t('fileLower'))}</span>
@@ -1280,12 +1436,19 @@ function renderNote(note) {
     </div>
 
     ${filePreviewHtml}
-    ${note.image ? `<img class="note-image" src="${note.image}" alt="">` : ''}
+    ${note.attachmentId && (note.fileMime || '').startsWith('image/') ? `<img class="note-image" data-attachment-id="${note.attachmentId}" alt="">` : ''}
     <textarea placeholder="${t('notePlaceholder')}">${escapeHtml(note.text)}</textarea>
     <div class="note-link-overlay" aria-hidden="true"></div>
   `;
 
   canvas.appendChild(el);
+
+  const imagePreview = el.querySelector('.note-image[data-attachment-id]');
+  if (imagePreview) {
+    getAttachmentObjectUrl(note.attachmentId).then(url => {
+      if (url && imagePreview.isConnected) imagePreview.src = url;
+    }).catch(err => console.warn('Falha ao carregar prévia do anexo:', err));
+  }
 
   const handle = el.querySelector('.handle');
   const ta = el.querySelector('textarea');
@@ -1317,7 +1480,7 @@ function renderNote(note) {
   if (filePreviewBar) {
     filePreviewBar.addEventListener('click', e => {
       e.stopPropagation();
-      openFileViewer(note.fileData, note.fileName, note.fileMime, note);
+      openFileViewer(note);
     });
   }
 
@@ -1957,166 +2120,379 @@ searchInput.addEventListener('keydown', e => {
 
 /* ===== EXPORTAR / IMPORTAR ===== */
 
-document.getElementById('exportNotes').addEventListener('click', () => {
-  // Salva o estado atual antes de exportar (garante dados frescos)
-  save();
+function downloadJson(payload, fileName) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
 
-  // Coleta dados de todos os quadros
-  const allBoards = boards.map(b => {
-    const data = (b.id === currentBoardId)
-      ? state                      // quadro ativo: usa estado em memória
-      : loadBoardData(b.id);       // demais: lê do localStorage
-    return {
-      id:    b.id,
-      name:  b.name,
-      notes: data.notes,
-      links: data.links,
-      nextId: data.nextId
-    };
-  });
+document.getElementById('exportNotes').addEventListener('click', async () => {
+  await flushBoardSave(currentBoardId);
+
+  const allBoards = [];
+  for (const board of boards) {
+    const data = board.id === currentBoardId ? state : await loadBoardData(board.id);
+    const exported = await NotesStorage.exportStateWithAttachments(data);
+    allBoards.push({
+      id: board.id,
+      name: board.name,
+      notes: exported.notes,
+      links: exported.links,
+      nextId: exported.nextId
+    });
+  }
 
   const payload = {
-    version: 2,                    // marca como exportação multi-quadro
+    version: 3,
     exportedAt: new Date().toISOString(),
     currentBoard: currentBoardId,
     boards: allBoards
   };
 
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
   const stamp = new Date().toISOString().slice(0, 10);
-
-  a.href     = url;
-  a.download = `notas-flutuantes-${stamp}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadJson(payload, `notas-flutuantes-${stamp}.json`);
 });
 
 const importInput = document.getElementById('importInput');
-
 document.getElementById('importNotes').addEventListener('click', () => importInput.click());
 
-importInput.addEventListener('change', () => {
+importInput.addEventListener('change', async () => {
   const file = importInput.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
+  try {
+    const parsed = JSON.parse(await file.text());
 
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
+    if (parsed && parsed.version >= 2 && Array.isArray(parsed.boards)) {
+      const totalNotes = parsed.boards.reduce((n, b) => n + (b.notes ? b.notes.length : 0), 0);
+      const totalBoards = parsed.boards.length;
+      if (!confirm(t('importAllConfirm', { boards: totalBoards, notes: totalNotes }))) return;
 
-      // ── Formato v2: exportação de todos os quadros ──
-      if (parsed && parsed.version === 2 && Array.isArray(parsed.boards)) {
-        const totalNotes = parsed.boards.reduce((n, b) => n + (b.notes ? b.notes.length : 0), 0);
-        const totalBoards = parsed.boards.length;
-
-        const proceed = confirm(
-          t('importAllConfirm', { boards: totalBoards, notes: totalNotes })
-        );
-        if (!proceed) return;
-
-        // Grava cada quadro no localStorage
-        const newBoards = parsed.boards.map(b => {
-          const id   = b.id || ('b' + Date.now() + Math.random().toString(36).slice(2));
-          const name = b.name || t('boardFallback');
-          const data = {
-            notes:  Array.isArray(b.notes)  ? b.notes  : [],
-            links:  Array.isArray(b.links)  ? b.links  : [],
-            nextId: typeof b.nextId === 'number' ? b.nextId
-                      : (b.notes || []).reduce((m, n) => Math.max(m, n.id || 0), 0) + 1
-          };
-          localStorage.setItem(boardDataKey(id), JSON.stringify(data));
-          return { id, name };
-        });
-
-        // Substitui a lista de quadros
-        boards.length = 0;
-        newBoards.forEach(b => boards.push(b));
-        saveBoardsList();
-
-        // Muda para o quadro que estava ativo na exportação (ou o primeiro)
-        const target = parsed.currentBoard && boards.find(b => b.id === parsed.currentBoard)
-          ? parsed.currentBoard
-          : boards[0].id;
-
-        switchBoard(target);
-        alert(t('importSuccess', { boards: totalBoards }));
-
-      // ── Formato v1 / legado: exportação de um único quadro ──
-      } else if (parsed && Array.isArray(parsed.notes)) {
-        const proceed = state.notes.length === 0 ||
-          confirm(t('importBoardConfirm'));
-        if (!proceed) return;
-
-        pushUndoSnapshot();
-
-        state = {
-          notes:  parsed.notes,
-          links:  Array.isArray(parsed.links) ? parsed.links : [],
-          nextId: typeof parsed.nextId === 'number'
-            ? parsed.nextId
-            : parsed.notes.reduce((m, n) => Math.max(m, n.id), 0) + 1
-        };
-
-        // Se o JSON tinha nome de quadro, renomeia o quadro atual
-        if (parsed.board) {
-          const board = boards.find(b => b.id === currentBoardId);
-          if (board) { board.name = parsed.board; saveBoardsList(); renderBoardSelect(); }
-        }
-
-        activeNoteId = null;
-        save();
-        render();
-
-      } else {
-        throw new Error(t('unrecognizedFileFormat'));
+      await flushAllPendingSaves();
+      for (const oldBoard of boards) {
+        await NotesStorage.deleteBoard(oldBoard.id);
+        localStorage.removeItem(boardDataKey(oldBoard.id));
+        localStorage.removeItem(recoveryKey(oldBoard.id));
       }
 
-    } catch (err) {
-      alert(t('importError', { message: err.message }));
-    } finally {
-      importInput.value = '';
-    }
-  };
+      const newBoards = [];
+      for (const importedBoard of parsed.boards) {
+        const id = importedBoard.id || ('b' + Date.now() + Math.random().toString(36).slice(2));
+        const name = importedBoard.name || t('boardFallback');
+        const rawState = {
+          notes: Array.isArray(importedBoard.notes) ? importedBoard.notes : [],
+          links: Array.isArray(importedBoard.links) ? importedBoard.links : [],
+          nextId: typeof importedBoard.nextId === 'number'
+            ? importedBoard.nextId
+            : (importedBoard.notes || []).reduce((m, n) => Math.max(m, n.id || 0), 0) + 1
+        };
+        const migrated = await NotesStorage.migrateState(id, rawState);
+        await NotesStorage.saveBoard(id, migrated);
+        newBoards.push({ id, name });
+      }
 
-  reader.readAsText(file);
+      boards = newBoards.length ? newBoards : [{ id: 'default', name: t('defaultBoard', { n: 1 }) }];
+      if (!newBoards.length) await NotesStorage.saveBoard('default', { notes: [], links: [], nextId: 1 });
+      saveBoardsList();
+      snapshotDirty = true;
+
+      const target = parsed.currentBoard && boards.find(b => b.id === parsed.currentBoard)
+        ? parsed.currentBoard
+        : boards[0].id;
+
+      await switchBoard(target);
+      alert(t('importSuccess', { boards: totalBoards }));
+
+    } else if (parsed && Array.isArray(parsed.notes)) {
+      const proceed = state.notes.length === 0 || confirm(t('importBoardConfirm'));
+      if (!proceed) return;
+
+      pushUndoSnapshot();
+      const rawState = {
+        notes: parsed.notes,
+        links: Array.isArray(parsed.links) ? parsed.links : [],
+        nextId: typeof parsed.nextId === 'number'
+          ? parsed.nextId
+          : parsed.notes.reduce((m, n) => Math.max(m, n.id || 0), 0) + 1
+      };
+      state = await NotesStorage.migrateState(currentBoardId, rawState);
+
+      if (parsed.board) {
+        const board = boards.find(b => b.id === currentBoardId);
+        if (board) {
+          board.name = parsed.board;
+          saveBoardsList();
+          renderBoardSelect();
+        }
+      }
+
+      activeNoteId = null;
+      save();
+      render();
+
+    } else {
+      throw new Error(t('unrecognizedFileFormat'));
+    }
+  } catch (err) {
+    alert(t('importError', { message: err.message }));
+  } finally {
+    importInput.value = '';
+  }
 });
 
 /* ===== BACKUP DE UM QUADRO SÓ ===== */
 
-document.getElementById('exportBoardNotes').addEventListener('click', () => {
-  save();
+document.getElementById('exportBoardNotes').addEventListener('click', async () => {
+  await flushBoardSave(currentBoardId);
 
   const board = boards.find(b => b.id === currentBoardId);
   const boardName = board ? board.name : t('boardFallback');
-
-  // Mesmo formato (v1/legado) que o Importar já sabe ler para um quadro só
+  const exported = await NotesStorage.exportStateWithAttachments(state);
   const payload = {
-    version: 1,
+    version: 3,
     exportedAt: new Date().toISOString(),
     board: boardName,
-    notes: state.notes,
-    links: state.links,
-    nextId: state.nextId
+    notes: exported.notes,
+    links: exported.links,
+    nextId: exported.nextId
   };
 
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
   const stamp = new Date().toISOString().slice(0, 10);
-
   const slug = boardName
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '') || 'quadro';
 
-  a.href     = url;
-  a.download = `notas-flutuantes-${slug}-${stamp}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadJson(payload, `notas-flutuantes-${slug}-${stamp}.json`);
+});
+
+/* ===== VERSÕES AUTOMÁTICAS / RECUPERAÇÃO ===== */
+
+const autoSnapshotsInput = document.getElementById('autoSnapshots');
+const snapshotIntervalSelect = document.getElementById('snapshotInterval');
+const snapshotSelect = document.getElementById('snapshotSelect');
+const restoreSnapshotBtn = document.getElementById('restoreSnapshot');
+const exportSnapshotBtn = document.getElementById('exportSnapshot');
+const deleteSnapshotBtn = document.getElementById('deleteSnapshot');
+let autoSnapshotTimer = null;
+
+function snapshotIntervalMinutes() {
+  const value = Number(localStorage.getItem(SNAPSHOT_INTERVAL_KEY) || '5');
+  return [1, 5, 15, 30].includes(value) ? value : 5;
+}
+
+function autoSnapshotsEnabled() {
+  return localStorage.getItem(AUTO_SNAPSHOTS_KEY) !== 'false';
+}
+
+function configureAutoSnapshots() {
+  if (autoSnapshotTimer) clearInterval(autoSnapshotTimer);
+  autoSnapshotTimer = null;
+
+  const enabled = autoSnapshotsInput.checked;
+  snapshotIntervalSelect.disabled = !enabled;
+  localStorage.setItem(AUTO_SNAPSHOTS_KEY, String(enabled));
+  localStorage.setItem(SNAPSHOT_INTERVAL_KEY, snapshotIntervalSelect.value);
+
+  if (!enabled) return;
+  const intervalMs = Number(snapshotIntervalSelect.value) * 60 * 1000;
+  autoSnapshotTimer = setInterval(async () => {
+    if (!appReady || !snapshotDirty) return;
+    await saveRecoverySnapshot('auto');
+  }, intervalMs);
+}
+
+function formatSnapshotLabel(snapshot) {
+  const date = new Date(snapshot.createdAt);
+  const when = date.toLocaleString(currentLanguage === 'en' ? 'en-US' : 'pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  const kind = snapshot.reason === 'manual' ? t('manualSnapshot') : t('automaticSnapshot');
+  return `${when} - ${kind}`;
+}
+
+async function captureWorkspaceState() {
+  await flushAllPendingSaves();
+  const workspaceBoards = [];
+
+  for (const board of boards) {
+    const boardState = board.id === currentBoardId
+      ? NotesStorage.cleanState(state)
+      : await loadBoardData(board.id);
+    workspaceBoards.push({
+      id: board.id,
+      name: board.name,
+      state: NotesStorage.cleanState(boardState)
+    });
+  }
+
+  return NotesStorage.cleanWorkspace({
+    currentBoard: currentBoardId,
+    boards: workspaceBoards
+  });
+}
+
+async function applyWorkspaceState(workspace) {
+  const clean = NotesStorage.cleanWorkspace(workspace);
+  if (!clean.boards.length) return false;
+
+  await flushAllPendingSaves();
+
+  const targetIds = new Set(clean.boards.map(board => board.id));
+  for (const oldBoard of boards) {
+    if (!targetIds.has(oldBoard.id)) {
+      await NotesStorage.deleteBoardState(oldBoard.id);
+      localStorage.removeItem(recoveryKey(oldBoard.id));
+    }
+  }
+
+  for (const board of clean.boards) {
+    await NotesStorage.saveBoard(board.id, board.state);
+    localStorage.removeItem(recoveryKey(board.id));
+  }
+
+  boards = clean.boards.map(board => ({ id: board.id, name: board.name || t('boardFallback') }));
+  saveBoardsList();
+
+  currentBoardId = boards.some(board => board.id === clean.currentBoard)
+    ? clean.currentBoard
+    : boards[0].id;
+  localStorage.setItem(CURRENT_BOARD_KEY, currentBoardId);
+
+  const activeBoard = clean.boards.find(board => board.id === currentBoardId) || clean.boards[0];
+  state = NotesStorage.cleanState(activeBoard.state);
+  activeNoteId = null;
+  linkPick = null;
+  linkMode = false;
+  linkBtn.classList.remove('active');
+  setMoveMode(false);
+  selectedNoteIds.clear();
+  snapshotDirty = true;
+
+  renderBoardSelect();
+  render();
+  flashSaveIndicator(true);
+  await refreshSnapshotList();
+  return true;
+}
+
+async function refreshSnapshotList(preferredId = null) {
+  if (!snapshotSelect || !appReady) return;
+  const previous = preferredId || snapshotSelect.value;
+  const snapshots = await NotesStorage.listWorkspaceSnapshots(30);
+  snapshotSelect.innerHTML = '';
+
+  if (!snapshots.length) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = t('noSnapshots');
+    snapshotSelect.appendChild(option);
+    snapshotSelect.disabled = true;
+    restoreSnapshotBtn.disabled = true;
+    exportSnapshotBtn.disabled = true;
+    deleteSnapshotBtn.disabled = true;
+    return;
+  }
+
+  snapshotSelect.disabled = false;
+  restoreSnapshotBtn.disabled = false;
+  exportSnapshotBtn.disabled = false;
+  deleteSnapshotBtn.disabled = false;
+  snapshots.forEach(snapshot => {
+    const option = document.createElement('option');
+    option.value = snapshot.id;
+    option.textContent = formatSnapshotLabel(snapshot);
+    snapshotSelect.appendChild(option);
+  });
+
+  if (previous && snapshots.some(snapshot => snapshot.id === previous)) {
+    snapshotSelect.value = previous;
+  }
+}
+
+async function saveRecoverySnapshot(reason = 'manual') {
+  if (!appReady) return;
+  try {
+    const workspace = await captureWorkspaceState();
+    const snapshot = await NotesStorage.createWorkspaceSnapshot(workspace, reason);
+    snapshotDirty = false;
+    await refreshSnapshotList(snapshot.id);
+    if (reason === 'manual') flashSaveIndicator(true);
+  } catch (err) {
+    console.error(t('snapshotSaveError'), err);
+    flashSaveIndicator(false);
+  }
+}
+
+async function selectedWorkspaceSnapshot() {
+  const snapshotId = snapshotSelect.value;
+  if (!snapshotId) return null;
+  const snapshot = await NotesStorage.getSnapshot(snapshotId);
+  return snapshot && snapshot.workspace ? snapshot : null;
+}
+
+async function exportSelectedSnapshot() {
+  const snapshot = await selectedWorkspaceSnapshot();
+  if (!snapshot) return;
+
+  const allBoards = [];
+  for (const board of snapshot.workspace.boards) {
+    const exported = await NotesStorage.exportStateWithAttachments(board.state);
+    allBoards.push({
+      id: board.id,
+      name: board.name,
+      notes: exported.notes,
+      links: exported.links,
+      nextId: exported.nextId
+    });
+  }
+
+  const payload = {
+    version: 4,
+    exportedAt: new Date().toISOString(),
+    snapshotCreatedAt: new Date(snapshot.createdAt).toISOString(),
+    snapshotReason: snapshot.reason,
+    currentBoard: snapshot.workspace.currentBoard,
+    boards: allBoards
+  };
+
+  const d = new Date(snapshot.createdAt);
+  const stamp = [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0')
+  ].join('-');
+  const time = `${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}`;
+  downloadJson(payload, `notas-flutuantes-versao-${stamp}-${time}.json`);
+}
+
+autoSnapshotsInput.addEventListener('change', configureAutoSnapshots);
+snapshotIntervalSelect.addEventListener('change', configureAutoSnapshots);
+document.getElementById('saveSnapshotNow').addEventListener('click', () => saveRecoverySnapshot('manual'));
+exportSnapshotBtn.addEventListener('click', exportSelectedSnapshot);
+
+deleteSnapshotBtn.addEventListener('click', async () => {
+  const snapshot = await selectedWorkspaceSnapshot();
+  if (!snapshot || !confirm(t('confirmDeleteSnapshot'))) return;
+
+  await NotesStorage.deleteSnapshot(snapshot.id);
+  pushUndoAction({ type: 'snapshot-presence', snapshot, present: true });
+  await refreshSnapshotList();
+});
+
+restoreSnapshotBtn.addEventListener('click', async () => {
+  const snapshot = await selectedWorkspaceSnapshot();
+  if (!snapshot || !confirm(t('confirmRestoreSnapshot'))) return;
+
+  const before = await captureWorkspaceState();
+  const restored = await applyWorkspaceState(snapshot.workspace);
+  if (restored) pushUndoAction({ type: 'workspace-state', workspace: before });
+  updateUndoRedoButtons();
 });
 
 /* ===== PAINEL DE CONFIGURAÇÕES ===== */
@@ -2129,6 +2505,7 @@ function openSettings() {
   closeCalendar();
   settingsPanel.classList.remove('hidden');
   settingsToggle.classList.add('active');
+  refreshSnapshotList();
 }
 
 function closeSettings() {
@@ -2167,39 +2544,87 @@ function updateUndoRedoButtons() {
   redoBtn.disabled = redoStack.length === 0;
 }
 
-function pushUndoSnapshot() {
-  undoStack.push(JSON.stringify(state));
-  if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+function pushHistoryEntry(stack, entry) {
+  stack.push(entry);
+  if (stack.length > UNDO_LIMIT) stack.shift();
+}
+
+function pushUndoAction(entry) {
+  pushHistoryEntry(undoStack, entry);
   redoStack = [];
   updateUndoRedoButtons();
 }
 
-function undo() {
+function pushUndoSnapshot() {
+  pushUndoAction({
+    type: 'board-state',
+    boardId: currentBoardId,
+    state: NotesStorage.cleanState(state)
+  });
+}
+
+async function executeHistoryEntry(entry, inverseStack) {
+  if (!entry) return;
+
+  if (entry.type === 'board-state') {
+    // Trocar de quadro limpa o histórico, então normalmente o ID coincide.
+    // A checagem evita aplicar acidentalmente um estado no quadro errado.
+    if (entry.boardId !== currentBoardId) return;
+
+    pushHistoryEntry(inverseStack, {
+      type: 'board-state',
+      boardId: currentBoardId,
+      state: NotesStorage.cleanState(state)
+    });
+    state = NotesStorage.cleanState(entry.state);
+    activeNoteId = null;
+    linkPick = null;
+    selectedNoteIds.clear();
+    save();
+    render();
+    return;
+  }
+
+  if (entry.type === 'workspace-state') {
+    const currentWorkspace = await captureWorkspaceState();
+    const applied = await applyWorkspaceState(entry.workspace);
+    if (applied) {
+      pushHistoryEntry(inverseStack, {
+        type: 'workspace-state',
+        workspace: currentWorkspace
+      });
+    }
+    return;
+  }
+
+  if (entry.type === 'snapshot-presence' && entry.snapshot) {
+    if (entry.present) {
+      await NotesStorage.putSnapshot(entry.snapshot);
+      await refreshSnapshotList(entry.snapshot.id);
+    } else {
+      await NotesStorage.deleteSnapshot(entry.snapshot.id);
+      await refreshSnapshotList();
+    }
+
+    pushHistoryEntry(inverseStack, {
+      type: 'snapshot-presence',
+      snapshot: entry.snapshot,
+      present: !entry.present
+    });
+  }
+}
+
+async function undo() {
   if (!undoStack.length) return;
-
-  redoStack.push(JSON.stringify(state));
-  state = JSON.parse(undoStack.pop());
-
-  // evita referência a nota que deixou de existir após o desfazer
-  activeNoteId = null;
-  linkPick = null;
-
-  save();
-  render();
+  const entry = undoStack.pop();
+  await executeHistoryEntry(entry, redoStack);
   updateUndoRedoButtons();
 }
 
-function redo() {
+async function redo() {
   if (!redoStack.length) return;
-
-  undoStack.push(JSON.stringify(state));
-  state = JSON.parse(redoStack.pop());
-
-  activeNoteId = null;
-  linkPick = null;
-
-  save();
-  render();
+  const entry = redoStack.pop();
+  await executeHistoryEntry(entry, undoStack);
   updateUndoRedoButtons();
 }
 
@@ -2623,8 +3048,27 @@ function renderBoardSelect() {
   });
 }
 
-applyStaticTranslations();
-renderBoardSelect();
-applyTransform();
-render();
-updateUndoRedoButtons();
+async function initializeApp() {
+  try {
+    await NotesStorage.open();
+    state = await loadBoardData(currentBoardId);
+    appReady = true;
+
+    applyStaticTranslations();
+    renderBoardSelect();
+    applyTransform();
+    render();
+    updateUndoRedoButtons();
+
+    autoSnapshotsInput.checked = autoSnapshotsEnabled();
+    snapshotIntervalSelect.value = String(snapshotIntervalMinutes());
+    configureAutoSnapshots();
+    await refreshSnapshotList();
+  } catch (err) {
+    console.error('Falha ao iniciar o aplicativo:', err);
+    flashSaveIndicator(false);
+    alert(t('saveError'));
+  }
+}
+
+initializeApp();
